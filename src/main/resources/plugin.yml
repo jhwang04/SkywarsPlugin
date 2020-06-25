@@ -1,0 +1,15 @@
+name: SkywarsPlugin
+main: com.justinhwang.skywarsplugin.SkywarsPlugin
+version: 1.0.0
+api-version: 1.15
+depend:
+  - Multiverse-Core
+commands:
+  skywars:
+    description: Access to enabling/disabling the skywars plugin
+    permission: skywarsplugin.skywars
+    permission-message: Cannot use command, do not have permisson
+permissions:
+  skywarsplugin.skywars:
+    description: Allows a user to enable/disable the plugin, to start a game, to reset the world, etc.
+    default: op

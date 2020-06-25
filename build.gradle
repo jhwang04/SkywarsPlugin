@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+group 'com.justinhwang'
+version '1.0.0'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+
+    maven {
+        name 'spigot-repo'
+        url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+
+    maven {
+        name 'bungeecord-repo'
+        url 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
+}
+
+dependencies {
+    compile 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
+}
