@@ -9,10 +9,11 @@ import org.bukkit.command.CommandSender;
 public class SkywarsCommand implements CommandExecutor {
 
     private SkywarsPlugin plugin;
-    private String defaultHelpMessage = "" +
-            ChatColor.GOLD + "Skywars Help\n" +
-            "------------------------------------\n" +
-            ChatColor.GREEN + "Type \"/skywars help <islands/chests/etc>\" for more detailed info.\n" +
+    private String defaultHelpMessage = "\n\n" +
+            ChatColor.GOLD + "-----------------------------------------------------\n" +
+            ChatColor.AQUA + "                          Skywars Help\n" +
+            ChatColor.AQUA + "   Type \"/skywars help <islands/chests/etc>\" for more info.\n" +
+            ChatColor.GOLD + "-----------------------------------------------------\n" +
             ChatColor.GOLD + "- /skywars islands\n" +
             ChatColor.GRAY + "   - Edit the number of player spawn islands on your map.\n" +
             ChatColor.GOLD + "- /skywars chests\n" +
@@ -37,7 +38,7 @@ public class SkywarsCommand implements CommandExecutor {
         if(args.length == 0) {
             //if just "/skywars" is written, with no args, it will send this message.
             sender.sendMessage(ChatColor.GOLD + "Type \"/skywars help\" for a list of commands!");
-        } else if(args.length == 1) {
+        } else if(args.length >= 1) {
             String arg0 = args[0].toLowerCase();
             switch(arg0) {
                 case "help":
@@ -51,6 +52,22 @@ public class SkywarsCommand implements CommandExecutor {
                 case "chests":
                     //if "/skywars chests" is written, then the "chests()" method will choose what to do next
                     chests(args, sender);
+                    break;
+                case "loot":
+                    //if "/skywars loot" is written, then the "loot()" method will choose what to do next
+                    loot(args, sender);
+                    break;
+                case "cages":
+                    //if "/skywars cages" is written, then the "cages()" method will choose what to do next
+                    cages(args, sender);
+                    break;
+                case "resetmap":
+                    //if "/skywars resetmap" is written, then the "resetMap()" method will choose what to do next
+                    resetMap(args, sender);
+                    break;
+                case "startgame":
+                    //if "/skywars startgame" is written, then the "startgame()" method will choose what to do next
+                    startGame(args, sender);
                     break;
                 default:
                     sender.sendMessage(ChatColor.GOLD + "Type \"/skywars help\" for a list of commands!");
@@ -122,8 +139,6 @@ public class SkywarsCommand implements CommandExecutor {
         sender.sendMessage(message);
     }
 
-
-
     // run when "/skywars islands" is written
     private void islands(String[] args, CommandSender sender) {
         String returnMessage = "";
@@ -133,7 +148,7 @@ public class SkywarsCommand implements CommandExecutor {
 
             switch(arg1) {
                 case "info":
-                    returnMessage = "Placeholder for # of islands, and # of set chests on each island";
+                    returnMessage = "Placeholder for returning # of islands, and # of set chests on each island";
                     break;
                 case "setnumber":
                     returnMessage = "Placeholder for setting # of islands";
@@ -148,9 +163,6 @@ public class SkywarsCommand implements CommandExecutor {
 
         sender.sendMessage(returnMessage);
     }
-
-
-
 
     // run when "/skywars chests" is sent
     private void chests(String[] args, CommandSender sender) {
@@ -190,23 +202,71 @@ public class SkywarsCommand implements CommandExecutor {
         sender.sendMessage(returnMessage);
     }
 
-
+    //run when "/skywars loot" is sent
     private void loot(String[] args, CommandSender sender) {
+        String returnMessage = "";
 
+        if(args.length > 1) {
+            String arg1 = args[1].toLowerCase();
+
+            switch(arg1) {
+                case "island":
+                    returnMessage = "Placeholder for # of islands, and # of set chests on each island";
+                    break;
+                case "mid":
+                    returnMessage = "Placeholder for setting # of islands";
+                    break;
+                default:
+                    returnMessage = ChatColor.RED + "Usage: /skywars loot <island/mid>";
+                    break;
+            }
+        } else {
+            returnMessage = ChatColor.RED + "Usage: /skywars loot <island/mid>";
+        }
+
+        sender.sendMessage(returnMessage);
     }
 
-
+    //run when "/skywars cages" is sent
     private void cages(String[] args, CommandSender sender) {
+        String returnMessage = "";
 
+        if(args.length > 1) {
+            String arg1 = args[1].toLowerCase();
+
+            switch(arg1) {
+                case "info":
+                    returnMessage = "Placeholder for displaying coords of each cage on each island";
+                    break;
+                case "set":
+                    if(args.length > 2) {
+                        returnMessage = "Placeholder for setting coords of a given island's cage";
+                    } else {
+                        returnMessage = ChatColor.RED + "Usage: /skywars cages set <island #>";
+                    }
+                    break;
+                default:
+                    returnMessage = ChatColor.RED + "Usage: /skywars cages <info/set>";
+                    break;
+            }
+        } else {
+            returnMessage = ChatColor.RED + "Usage: /skywars cages <info/set>";
+        }
+
+        sender.sendMessage(returnMessage);
     }
 
-
+    //run when "/skywars resetmap" is sent
     private void resetMap(String[] args, CommandSender sender) {
+        String returnMessage = "Placeholder for kicking players from world, and resetting the map";
 
+        sender.sendMessage(returnMessage);
     }
 
-
+    //run when "/skywars startgame" is sent
     private void startGame(String[] args, CommandSender sender) {
+        String returnMessage = "Placeholder for starting up a game of skywars";
 
+        sender.sendMessage(returnMessage);
     }
 }

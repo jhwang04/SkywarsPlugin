@@ -1,9 +1,7 @@
 name: SkywarsPlugin
 main: com.justinhwang.skywarsplugin.SkywarsPlugin
 version: 1.0.0
-api-version: 1.15
-depend:
-  - Multiverse-Core
+api-version: 1.16
 commands:
   skywars:
     description: Access to enabling/disabling the skywars plugin

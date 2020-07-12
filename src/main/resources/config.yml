@@ -1,9 +1,9 @@
 ## Whether or not the plugin, as a whole, can be used
 enabled: true
 
-## The world file that is copied for each instance of a skywars game.
-## Built a template world/map that you'd like to use, and name the world file <name>_template
-template_world: defaultMap_template
+## The world file that players are sent to after a skywars game, or while the map is being reset.
+lobby_world: world
 
-## The world file you'd like to use for the game itself, that will be reset from the template
-game_world: defaultMap
+## The world file that is copied for each instance of a skywars game.
+## Build a template world/map that you'd like to use, and name the world file <name>_template
+template_world: defaultMap_template
