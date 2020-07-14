@@ -1,2 +1,5 @@
-## This file contains the coordinates of the cages and chests
-testkey: testvalue
+## This file contains the coordinates of all islands, cages, and chests.
+
+## The number of spawn islands the plugin is expecting
+numberOfIslands: 8
+chestsOnSpawnIslands: 3
