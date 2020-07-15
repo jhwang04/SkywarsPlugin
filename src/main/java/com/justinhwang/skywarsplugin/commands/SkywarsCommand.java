@@ -243,7 +243,7 @@ public class SkywarsCommand implements CommandExecutor {
                         }
                     } else {
                         returnMessage = headerLine;
-                        returnMessage += ChatColor.GOLD + "                    Chest Info\n";
+                        returnMessage += ChatColor.GOLD + "                   Chest Info\n";
                         returnMessage += "Use \"/skywars chests info <island #>\" for specific details.\n";
                         returnMessage += headerLine;
 
