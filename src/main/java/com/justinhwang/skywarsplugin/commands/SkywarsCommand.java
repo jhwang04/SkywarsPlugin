@@ -123,7 +123,9 @@ public class SkywarsCommand implements CommandExecutor {
                             ChatColor.GOLD + "- /skywars chests clear <island>\n" +
                             ChatColor.GRAY + "   - Erases locations of all chests on the specified island.\n" +
                             ChatColor.GOLD + "- /skywars chests add <island>\n" +
-                            ChatColor.GRAY + "   - Sets the location of the specified island & chest number to the player's current location.";
+                            ChatColor.GRAY + "   - Sets the location of the specified island & chest number to the player's current location.\n" +
+                            ChatColor.GOLD + "- /skywars chests number <info/set>\n" +
+                            ChatColor.GRAY + "   - Sets the number of chests that SkywarsPlugin is expecting on each spawn island.";
                     break;
                 case "loot":
                     message = "" +
@@ -266,13 +268,14 @@ public class SkywarsCommand implements CommandExecutor {
                         if(isParsable(args[2])) {
                             int arg2 = Integer.parseInt(args[2]);
                             int chestsOnIsland = howManyChests(arg2);
+                            int i = chestsOnIsland;
 
                             while(chestsOnIsland > 0) {
-                                chestInfo.set("island_" + arg2 + "_" + chestsOnIsland, null);
+                                chestInfo.set("island_" + arg2 + "_" + i, null);
                                 saveChestInfo();
-                                chestsOnIsland--;
+                                i--;
                             }
-                            returnMessage = ChatColor.GOLD + "Chest locations cleared for island #" + arg2 + "!";
+                            returnMessage = ChatColor.GOLD + "" + chestsOnIsland + " chest locations cleared for island #" + arg2 + "!";
                         } else {
                             returnMessage = ChatColor.RED + "Please enter a valid number!";
                         }
@@ -285,7 +288,7 @@ public class SkywarsCommand implements CommandExecutor {
                         if(args.length > 2) {
                             if(isParsable(args[2])) {
                                 int arg2 = Integer.parseInt(args[2]);
-                                if(arg2 <= chestInfo.getInt("numberOfIslands")) {
+                                if(arg2 <= chestInfo.getInt("numberOfIslands") && arg2 > 0) {
 
                                     int chestNumber = howManyChests(arg2) + 1;
 
@@ -299,7 +302,7 @@ public class SkywarsCommand implements CommandExecutor {
 
                                         saveChestInfo();
 
-                                        returnMessage = ChatColor.GOLD + "Island " + arg2 + ", Chest " + chestNumber + ", has been set to " + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ();
+                                        returnMessage = ChatColor.GOLD + "Island " + arg2 + ", Chest " + chestNumber + ", has been set to (" + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() + ")";
                                     } else {
                                         returnMessage = ChatColor.RED + "There are already enough chests! Use \"/skywars chests clear <island #>\" to clear chest locations for the given island.";
                                     }
@@ -378,17 +381,55 @@ public class SkywarsCommand implements CommandExecutor {
     //run when "/skywars cages" is sent
     private void cages(String[] args, CommandSender sender) {
         String returnMessage = "";
+        FileConfiguration chestInfo = plugin.getChestInfo();
 
         if(args.length > 1) {
             String arg1 = args[1].toLowerCase();
 
             switch(arg1) {
                 case "info":
-                    returnMessage = "Placeholder for displaying coords of each cage on each island";
+
+                    returnMessage = headerLine;
+                    returnMessage += ChatColor.GOLD + "                   Cage Info\n";
+                    returnMessage += headerLine;
+
+                    int numberOfIslands = chestInfo.getInt("numberOfIslands");
+                    for(int i = 1; i <= numberOfIslands; i++) {
+                        if(chestInfo.contains("cage_" + i + ".")) {
+                            int x = chestInfo.getInt("cage_" + i + ".x");
+                            int y = chestInfo.getInt("cage_" + i + ".y");
+                            int z = chestInfo.getInt("cage_" + i + ".z");
+
+                            returnMessage += ChatColor.GOLD + "Island #" + i + " has its cage set to (" + x + ", " + y + ", " + z + ")\n";
+                        } else {
+                            returnMessage += ChatColor.AQUA + "Island #" + i + " does not have a cage location set!\n";
+                        }
+                    }
                     break;
                 case "set":
                     if(args.length > 2) {
-                        returnMessage = "Placeholder for setting coords of a given island's cage";
+                        if (isParsable(args[2])) {
+                            int arg2 = Integer.parseInt(args[2]);
+                            if (arg2 <= chestInfo.getInt("numberOfIslands") && arg2 > 0) {
+                                Location loc = ((Player) sender).getLocation();
+
+                                int x = loc.getBlockX();
+                                int y = loc.getBlockY();
+                                int z = loc.getBlockZ();
+
+                                chestInfo.set("cage_" + arg2 + ".x", x);
+                                chestInfo.set("cage_" + arg2 + ".y", y);
+                                chestInfo.set("cage_" + arg2 + ".z", z);
+
+                                saveChestInfo();
+
+                                returnMessage = ChatColor.GOLD + "The cage location for island #" + arg2 + " has been set to (" + x + ", " + y + ", " + z + ")";
+                            } else {
+                                returnMessage = ChatColor.RED + "The island you specified, " + arg2 + ", is out of range. Use \"/skywars islands\" for more details.";
+                            }
+                        } else {
+                            returnMessage = ChatColor.RED + "Please enter a valid number!";
+                        }
                     } else {
                         returnMessage = ChatColor.RED + "Usage: /skywars cages set <island #>";
                     }
