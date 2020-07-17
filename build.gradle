@@ -22,5 +22,5 @@ repositories {
 }
 
 dependencies {
-    compile 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
+    compile 'org.spigotmc:spigot-api:1.16.1-R0.1-SNAPSHOT'
 }

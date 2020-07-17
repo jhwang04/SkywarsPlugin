@@ -1,17 +1,25 @@
 package com.justinhwang.skywarsplugin.commands;
 
 import com.justinhwang.skywarsplugin.SkywarsPlugin;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class SkywarsCommand implements CommandExecutor {
+    private Inventory templateInv = Bukkit.createInventory(null, 54, "Loot");
 
     private SkywarsPlugin plugin;
     private static String headerLine = ChatColor.AQUA + "-----------------------------------------------------\n";
@@ -38,6 +46,39 @@ public class SkywarsCommand implements CommandExecutor {
 
     public SkywarsCommand(SkywarsPlugin plugin) {
         this.plugin = plugin;
+
+
+        //filling in the bottom slots of the templateInv inventory view
+        ItemStack grayGlass = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
+        ItemMeta glassMeta = grayGlass.getItemMeta();
+
+        glassMeta.setDisplayName(ChatColor.GRAY + "Cannot use these slots!");
+        //List<String> lore = Arrays.asList(ChatColor.GRAY + "Cannot use these slots!");
+        //glassMeta.setLore(lore);
+        grayGlass.setItemMeta(glassMeta);
+
+        for(int i = 45; i < 54; i++) {
+            templateInv.setItem(i, grayGlass);
+        }
+
+        ItemStack confirmSword = new ItemStack(Material.NETHERITE_SWORD, 1);
+        ItemMeta swordMeta = confirmSword.getItemMeta();
+        swordMeta.setDisplayName(ChatColor.GREEN + "Confirm changes!");
+        confirmSword.setItemMeta(swordMeta);
+
+        ItemStack eraseAll = new ItemStack(Material.BRICK);
+        ItemMeta eraserMeta = eraseAll.getItemMeta();
+        eraserMeta.setDisplayName(ChatColor.DARK_RED + "Clear all items!");
+        eraseAll.setItemMeta(eraserMeta);
+
+        ItemStack revert = new ItemStack(Material.BARRIER);
+        ItemMeta revertMeta = revert.getItemMeta();
+        revertMeta.setDisplayName(ChatColor.RED + "Exit and revert all changes!");
+        revert.setItemMeta(revertMeta);
+
+        templateInv.setItem(48, eraseAll);
+        templateInv.setItem(49, revert);
+        templateInv.setItem(50, confirmSword);
     }
 
     @Override
@@ -190,7 +231,7 @@ public class SkywarsCommand implements CommandExecutor {
                         if(isParsable(args[2])) {
                             int newNumber = Integer.parseInt(args[2]);
                             plugin.getChestInfo().set("numberOfIslands", newNumber);
-                            saveChestInfo();
+                            plugin.saveChestInfo();
                             returnMessage = ChatColor.GOLD + "Number of islands has been changed from " + oldNumber + " to " + newNumber;
                         } else {
                             returnMessage = ChatColor.RED + "Please enter a valid number!";
@@ -257,7 +298,13 @@ public class SkywarsCommand implements CommandExecutor {
                             if(i == 0) {
                                 returnMessage += ChatColor.GOLD + "The middle island (Island #0) has " + numberOfChests + " chest locations set.\n";
                             } else {
-                                returnMessage += ChatColor.GOLD + "Island #" + i + " has " + numberOfChests + "/" + chestsPerIsland + " chest locations set.\n";
+                                String addedLine = ChatColor.GOLD + "Island #" + i + " has " + numberOfChests + "/" + chestsPerIsland + " chest locations set.\n";
+                                if(numberOfChests == chestsPerIsland) {
+                                    returnMessage += addedLine;
+                                } else {
+                                    returnMessage += ChatColor.AQUA + addedLine;
+                                }
+
                             }
                         }
 
@@ -272,7 +319,7 @@ public class SkywarsCommand implements CommandExecutor {
 
                             while(chestsOnIsland > 0) {
                                 chestInfo.set("island_" + arg2 + "_" + i, null);
-                                saveChestInfo();
+                                plugin.saveChestInfo();
                                 i--;
                             }
                             returnMessage = ChatColor.GOLD + "" + chestsOnIsland + " chest locations cleared for island #" + arg2 + "!";
@@ -300,7 +347,7 @@ public class SkywarsCommand implements CommandExecutor {
                                         chestInfo.set("island_" + arg2 + "_" + chestNumber + ".y", loc.getBlockY());
                                         chestInfo.set("island_" + arg2 + "_" + chestNumber + ".z", loc.getBlockZ());
 
-                                        saveChestInfo();
+                                        plugin.saveChestInfo();
 
                                         returnMessage = ChatColor.GOLD + "Island " + arg2 + ", Chest " + chestNumber + ", has been set to (" + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() + ")";
                                     } else {
@@ -330,7 +377,7 @@ public class SkywarsCommand implements CommandExecutor {
                             if(isParsable(args[3])) {
                                 int arg3 = Integer.parseInt(args[3]);
                                 chestInfo.set("chestsOnSpawnIslands", arg3);
-                                saveChestInfo();
+                                plugin.saveChestInfo();
                                 returnMessage = ChatColor.GOLD + "Chests on each spawn island has been changed from " + oldNumber + " to " + arg3;
                             } else {
                                 returnMessage = ChatColor.RED + "Usage: /skywars chests number set <# of chests on each spawn island>";
@@ -362,10 +409,49 @@ public class SkywarsCommand implements CommandExecutor {
 
             switch(arg1) {
                 case "island":
-                    returnMessage = "Placeholder for # of islands, and # of set chests on each island";
+
+                    if(sender instanceof  Player) {
+                        Inventory inv = Bukkit.createInventory(null, 54, "Island Loot");
+
+                        inv.setContents(templateInv.getContents());
+
+                        plugin.setPlayerConfiguringLoot((Player) sender);
+
+                        for(int i = 0; i < 45; i++) {
+                            ItemStack newItem = plugin.getLoot().getItemStack("islandloot." + i);
+                            inv.setItem(i, newItem);
+                        }
+
+                        ((Player) sender).openInventory(inv);
+
+                        returnMessage = ChatColor.GOLD + "Editing island loot...";
+                    } else {
+                        returnMessage = ChatColor.RED + "You must be a player to use this command!";
+                    }
+
                     break;
                 case "mid":
-                    returnMessage = "Placeholder for setting # of islands";
+
+                    if(sender instanceof  Player) {
+
+                        Inventory inv = Bukkit.createInventory(null, 54, "Middle Island Loot");
+
+                        inv.setContents(templateInv.getContents());
+
+                        plugin.setPlayerConfiguringLoot((Player) sender);
+
+                        for(int i = 0; i < 45; i++) {
+                            ItemStack newItem = plugin.getLoot().getItemStack("midloot." + i);
+                            inv.setItem(i, newItem);
+                        }
+
+                        ((Player) sender).openInventory(inv);
+
+                        returnMessage = ChatColor.GOLD + "Editing middle loot...";
+                    } else {
+                        returnMessage = ChatColor.RED + "You must be a player to use this command!";
+                    }
+
                     break;
                 default:
                     returnMessage = ChatColor.RED + "Usage: /skywars loot <island/mid>";
@@ -421,7 +507,7 @@ public class SkywarsCommand implements CommandExecutor {
                                 chestInfo.set("cage_" + arg2 + ".y", y);
                                 chestInfo.set("cage_" + arg2 + ".z", z);
 
-                                saveChestInfo();
+                                plugin.saveChestInfo();
 
                                 returnMessage = ChatColor.GOLD + "The cage location for island #" + arg2 + " has been set to (" + x + ", " + y + ", " + z + ")";
                             } else {
@@ -454,7 +540,13 @@ public class SkywarsCommand implements CommandExecutor {
 
     //run when "/skywars startgame" is sent
     private void startGame(String[] args, CommandSender sender) {
-        String returnMessage = "Placeholder for starting up a game of skywars";
+        String returnMessage = "Filling all chests";
+
+        if(areAllChestsSet()) {
+
+        } else {
+            returnMessage = ChatColor.RED + "You need to set all the chest locations for the islands!\nUse \"/skywars chests info\" to see what's missing!";
+        }
 
         sender.sendMessage(returnMessage);
     }
@@ -522,6 +614,7 @@ public class SkywarsCommand implements CommandExecutor {
     }
 
 
+
     // method to check if a text string is an integer
     public static boolean isParsable(String input) {
         try {
@@ -543,12 +636,18 @@ public class SkywarsCommand implements CommandExecutor {
         return counter;
     }
 
-    //save the chestInfo file
-    public void saveChestInfo() {
-        try {
-            plugin.getChestInfo().save(plugin.getChestInfoFile());
-        } catch (IOException e) {
-            e.printStackTrace();
+    // are all chests placed
+    public boolean areAllChestsSet() {
+        boolean chestsSet = true;
+
+        for(int i = 1; i <= plugin.getChestInfo().getInt("numberOfIslands"); i++) {
+            if(howManyChests(i) == plugin.getChestInfo().getInt("chestsOnSpawnIslands")) {
+                Bukkit.getLogger().info("Broken! Island " + i + " has only " + howManyChests(i) + " chests.");
+                chestsSet = false;
+            }
         }
+
+        return chestsSet;
     }
+
 }

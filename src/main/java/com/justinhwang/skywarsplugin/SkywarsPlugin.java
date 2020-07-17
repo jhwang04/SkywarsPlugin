@@ -1,9 +1,11 @@
 package com.justinhwang.skywarsplugin;
 
 import com.justinhwang.skywarsplugin.commands.SkywarsCommand;
+import com.justinhwang.skywarsplugin.events.LootConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -20,6 +22,8 @@ public class SkywarsPlugin extends JavaPlugin {
     private FileConfiguration chestInfo;
     private FileConfiguration loot;
 
+    private Player playerConfiguringLoot;
+
     @Override
     public void onEnable() {
         //ensures that a config.yml file exists somewhere, to be accessed. Does nothing if file already exists.
@@ -34,7 +38,7 @@ public class SkywarsPlugin extends JavaPlugin {
         }
 
         //saves the default version of loot.yml if it does not exist
-        lootFile = new File(getDataFolder(), "lootInfo.yml");
+        lootFile = new File(getDataFolder(), "loot.yml");
         loot = YamlConfiguration.loadConfiguration(lootFile);
         if(lootFile.exists() == false) {
             saveResource("loot.yml", false);
@@ -44,6 +48,8 @@ public class SkywarsPlugin extends JavaPlugin {
         //registering the command
         getCommand("skywars").setExecutor(new SkywarsCommand(this));
 
+        getServer().getPluginManager().registerEvents(new LootConfig(this), this);
+
         getLogger().info("Skywars plugin has been enabled");
     }
 
@@ -51,15 +57,37 @@ public class SkywarsPlugin extends JavaPlugin {
         return chestInfo;
     }
 
-    public FileConfiguration getLoot() {
-        return loot;
-    }
-
     public File getChestInfoFile() {
         return chestInfoFile;
+    }
+
+    public void saveChestInfo() {
+        try {
+            getChestInfo().save(getChestInfoFile());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public FileConfiguration getLoot() {
+        return loot;
     }
 
     public File getLootFile() {
         return lootFile;
     }
+
+    public void saveLootInfo() {
+        try {
+            getLoot().save(getLootFile());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public Player getPlayerConfiguringLoot() {return playerConfiguringLoot;}
+
+    public void setPlayerConfiguringLoot(Player p) {this.playerConfiguringLoot = p;}
 }
