@@ -283,6 +283,8 @@ public class SkywarsCommand implements CommandExecutor {
                                 returnMessage = ChatColor.RED + "Given number, " + arg2 + ", is out of range.\n" +
                                         "Use \"/skywars islands info\" to check the number of islands expected.";
                             }
+                        } else {
+                            returnMessage = ChatColor.RED + "Please enter a valid number!";
                         }
                     } else {
                         returnMessage = headerLine;
@@ -298,9 +300,9 @@ public class SkywarsCommand implements CommandExecutor {
                             if(i == 0) {
                                 returnMessage += ChatColor.GOLD + "The middle island (Island #0) has " + numberOfChests + " chest locations set.\n";
                             } else {
-                                String addedLine = ChatColor.GOLD + "Island #" + i + " has " + numberOfChests + "/" + chestsPerIsland + " chest locations set.\n";
+                                String addedLine = "Island #" + i + " has " + numberOfChests + "/" + chestsPerIsland + " chest locations set.\n";
                                 if(numberOfChests == chestsPerIsland) {
-                                    returnMessage += addedLine;
+                                    returnMessage += ChatColor.GOLD + addedLine;
                                 } else {
                                     returnMessage += ChatColor.AQUA + addedLine;
                                 }
@@ -542,10 +544,39 @@ public class SkywarsCommand implements CommandExecutor {
     private void startGame(String[] args, CommandSender sender) {
         String returnMessage = "Filling all chests";
 
-        if(areAllChestsSet()) {
-
-        } else {
+        if(!areAllChestsSet()) {
             returnMessage = ChatColor.RED + "You need to set all the chest locations for the islands!\nUse \"/skywars chests info\" to see what's missing!";
+        } else {
+            int numberOfIslands = plugin.getChestInfo().getInt("numberOfIslands");
+            int numberOfChests = plugin.getChestInfo().getInt("chestsOnSpawnIslands");
+
+            List<ItemStack> islandLoot = Arrays.asList();
+            List<ItemStack> midLoot = Arrays.asList();
+
+            //creating the list of items that can be selected
+            for(int i = 0; i < 45; i++) {
+                ItemStack newIslandItem = plugin.getLoot().getItemStack("islandloot." + i);
+                if(newIslandItem != null) {
+                    islandLoot.add(newIslandItem);
+                }
+
+                ItemStack newMidItem = plugin.getLoot().getItemStack("midloot." + i);
+                if(newMidItem != null) {
+                    midLoot.add(newMidItem);
+                }
+            }
+
+            Bukkit.getLogger().info("islandLoot.size = " + islandLoot.size());
+            Bukkit.getLogger().info("midLoot.size = " + midLoot.size());
+
+            for(int i = 1; i <= numberOfIslands; i++) {
+                for(int j = 0; j < 27; j++) {
+
+
+
+                }
+            }
+
         }
 
         sender.sendMessage(returnMessage);
@@ -641,8 +672,7 @@ public class SkywarsCommand implements CommandExecutor {
         boolean chestsSet = true;
 
         for(int i = 1; i <= plugin.getChestInfo().getInt("numberOfIslands"); i++) {
-            if(howManyChests(i) == plugin.getChestInfo().getInt("chestsOnSpawnIslands")) {
-                Bukkit.getLogger().info("Broken! Island " + i + " has only " + howManyChests(i) + " chests.");
+            if(howManyChests(i) != plugin.getChestInfo().getInt("chestsOnSpawnIslands")) {
                 chestsSet = false;
             }
         }
