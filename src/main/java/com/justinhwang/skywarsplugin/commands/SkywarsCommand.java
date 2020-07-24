@@ -1,10 +1,9 @@
 package com.justinhwang.skywarsplugin.commands;
 
 import com.justinhwang.skywarsplugin.SkywarsPlugin;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
+//import org.bukkit.block.data.type.Chest;
+import org.bukkit.block.Chest;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -542,37 +541,94 @@ public class SkywarsCommand implements CommandExecutor {
 
     //run when "/skywars startgame" is sent
     private void startGame(String[] args, CommandSender sender) {
-        String returnMessage = "Filling all chests";
+        String returnMessage = "placeholder";
 
         if(!areAllChestsSet()) {
             returnMessage = ChatColor.RED + "You need to set all the chest locations for the islands!\nUse \"/skywars chests info\" to see what's missing!";
         } else {
             int numberOfIslands = plugin.getChestInfo().getInt("numberOfIslands");
-            int numberOfChests = plugin.getChestInfo().getInt("chestsOnSpawnIslands");
 
-            List<ItemStack> islandLoot = Arrays.asList();
-            List<ItemStack> midLoot = Arrays.asList();
+            ItemStack[] islandLoot = new ItemStack[0];
+            ItemStack[] midLoot = new ItemStack[0];
 
             //creating the list of items that can be selected
             for(int i = 0; i < 45; i++) {
                 ItemStack newIslandItem = plugin.getLoot().getItemStack("islandloot." + i);
                 if(newIslandItem != null) {
-                    islandLoot.add(newIslandItem);
+                    islandLoot = addItem(islandLoot, newIslandItem);
                 }
 
                 ItemStack newMidItem = plugin.getLoot().getItemStack("midloot." + i);
                 if(newMidItem != null) {
-                    midLoot.add(newMidItem);
+                    midLoot = addItem(midLoot, newMidItem);
                 }
             }
 
-            Bukkit.getLogger().info("islandLoot.size = " + islandLoot.size());
-            Bukkit.getLogger().info("midLoot.size = " + midLoot.size());
+            // REMEMBER TO CHANGE THIS TO BE THE GAME WORLD INSTEAD OF THE TEMPLATE WORLD! VERY IMPORTANT!
+            String worldName = plugin.getConfig().getString("template_world");
+            World world = Bukkit.getWorld(worldName);
 
-            for(int i = 1; i <= numberOfIslands; i++) {
+            if(world == null) {
+                sender.sendMessage(ChatColor.RED + "You need a valid template world! Set it by using \"/skywars config templateworld\"");
+            }
+
+
+
+            //for each island...
+            for(int i = 0; i <= numberOfIslands; i++) {
+
+                int numberOfChests = howManyChests(i);
+                ItemStack[] variableLoot;
+                if(i == 0) {
+                    variableLoot = midLoot;
+                } else {
+                    variableLoot = islandLoot;
+                }
+
+                //for every item to add to a chest...
                 for(int j = 0; j < 27; j++) {
+                    Chest[] chests = new Chest[0];
 
+                    //for every chest in the length...
+                    for(int c = 1; c <= numberOfChests; c++) {
+                        int chestX = plugin.getChestInfo().getInt("island_" + i + "_" + c + ".x");
+                        int chestY = plugin.getChestInfo().getInt("island_" + i + "_" + c + ".y");
+                        int chestZ = plugin.getChestInfo().getInt("island_" + i + "_" + c + ".z");
 
+                        if(world.getBlockAt(chestX, chestY, chestZ).getType() != Material.CHEST) {
+                            world.getBlockAt(chestX, chestY, chestZ).setType(Material.CHEST);
+                        }
+
+                        //Chest newChest = (Chest) world.getBlockAt(chestX, chestY, chestZ).getBlockData();
+                        Chest newChest = (Chest) world.getBlockAt(chestX, chestY, chestZ).getState();
+                        newChest.getInventory().clear();
+
+                        chests = addChest(chests, newChest);
+                    }
+
+                    //will not override a non-empty slot
+                    boolean isValidItemSlot = false;
+                    while(isValidItemSlot == false) {
+
+                        int chosenChest = (int) (Math.random() * numberOfChests);
+                        int chosenSlot = (int) (Math.random() * 27);
+                        int chosenItem = 0;
+
+                        chosenItem = (int) (Math.random() * variableLoot.length);
+
+                        //if slot is empty
+                        if(chests[chosenChest].getInventory().getItem(chosenSlot) == null || variableLoot.length == 0) {
+                            Bukkit.getLogger().info("Good! " + chests[chosenChest].getInventory().getItem(chosenSlot) + ", slot + " + chosenSlot);
+
+                            if(variableLoot.length != 0) {
+                                chests[chosenChest].getInventory().setItem(chosenSlot, variableLoot[chosenItem]);
+                            }
+
+                            isValidItemSlot = true;
+                        } else {
+                            Bukkit.getLogger().info("Was not valid!");
+                        }
+                    }
 
                 }
             }
@@ -679,5 +735,32 @@ public class SkywarsCommand implements CommandExecutor {
 
         return chestsSet;
     }
+
+    //adds element to an array
+    public ItemStack[] addItem(ItemStack[] old, ItemStack x) {
+        int oldNum = old.length;
+        ItemStack[] newArray = new ItemStack[oldNum + 1];
+
+        for(int i = 0; i < oldNum; i++) {
+            newArray[i] = old[i];
+        }
+        newArray[oldNum] = x;
+
+        return newArray;
+    }
+
+    //adds a chest to an array
+    public Chest[] addChest(Chest[] old, Chest x) {
+        int oldNum = old.length;
+        Chest[] newArray = new Chest[oldNum + 1];
+
+        for(int i = 0; i < oldNum; i++) {
+            newArray[i] = old[i];
+        }
+        newArray[oldNum] = x;
+
+        return newArray;
+    }
+
 
 }
