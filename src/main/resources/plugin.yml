@@ -7,7 +7,17 @@ commands:
     description: Access to enabling/disabling the skywars plugin
     permission: skywarsplugin.skywars
     permission-message: Cannot use command, do not have permisson
+  lobby:
+    description: Teleports the player to the specified lobby world
+    permission: skywarsplugin.lobby
+    aliases:
+      - l
+      - hub
+      - leave
 permissions:
   skywarsplugin.skywars:
     description: Allows a user to enable/disable the plugin, to start a game, to reset the world, etc.
     default: op
+  skywarsplugin.lobby:
+    description: Allows a user to teleport to the lobby world
+    default: true

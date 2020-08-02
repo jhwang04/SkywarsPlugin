@@ -12,8 +12,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.FileUtil;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -123,6 +127,9 @@ public class SkywarsCommand implements CommandExecutor {
                 case "config":
                     //if "/skywars config" is written, the "config()" method will choose what to do next
                     config(args, sender);
+                    break;
+                case "endgame":
+                    endGame(args, sender);
                     break;
                 default:
                     sender.sendMessage(ChatColor.GOLD + "Type \"/skywars help\" for a list of commands!");
@@ -541,99 +548,53 @@ public class SkywarsCommand implements CommandExecutor {
 
     //run when "/skywars startgame" is sent
     private void startGame(String[] args, CommandSender sender) {
-        String returnMessage = "placeholder";
+        String returnMessage;
 
-        if(!areAllChestsSet()) {
-            returnMessage = ChatColor.RED + "You need to set all the chest locations for the islands!\nUse \"/skywars chests info\" to see what's missing!";
-        } else {
-            int numberOfIslands = plugin.getChestInfo().getInt("numberOfIslands");
-
-            ItemStack[] islandLoot = new ItemStack[0];
-            ItemStack[] midLoot = new ItemStack[0];
-
-            //creating the list of items that can be selected
-            for(int i = 0; i < 45; i++) {
-                ItemStack newIslandItem = plugin.getLoot().getItemStack("islandloot." + i);
-                if(newIslandItem != null) {
-                    islandLoot = addItem(islandLoot, newIslandItem);
-                }
-
-                ItemStack newMidItem = plugin.getLoot().getItemStack("midloot." + i);
-                if(newMidItem != null) {
-                    midLoot = addItem(midLoot, newMidItem);
-                }
-            }
-
-            // REMEMBER TO CHANGE THIS TO BE THE GAME WORLD INSTEAD OF THE TEMPLATE WORLD! VERY IMPORTANT!
-            String worldName = plugin.getConfig().getString("template_world");
-            World world = Bukkit.getWorld(worldName);
-
-            if(world == null) {
-                sender.sendMessage(ChatColor.RED + "You need a valid template world! Set it by using \"/skywars config templateworld\"");
-            }
-
-
-
-            //for each island...
-            for(int i = 0; i <= numberOfIslands; i++) {
-
-                int numberOfChests = howManyChests(i);
-                ItemStack[] variableLoot;
-                if(i == 0) {
-                    variableLoot = midLoot;
-                } else {
-                    variableLoot = islandLoot;
-                }
-
-                //for every item to add to a chest...
-                for(int j = 0; j < 27; j++) {
-                    Chest[] chests = new Chest[0];
-
-                    //for every chest in the length...
-                    for(int c = 1; c <= numberOfChests; c++) {
-                        int chestX = plugin.getChestInfo().getInt("island_" + i + "_" + c + ".x");
-                        int chestY = plugin.getChestInfo().getInt("island_" + i + "_" + c + ".y");
-                        int chestZ = plugin.getChestInfo().getInt("island_" + i + "_" + c + ".z");
-
-                        if(world.getBlockAt(chestX, chestY, chestZ).getType() != Material.CHEST) {
-                            world.getBlockAt(chestX, chestY, chestZ).setType(Material.CHEST);
-                        }
-
-                        //Chest newChest = (Chest) world.getBlockAt(chestX, chestY, chestZ).getBlockData();
-                        Chest newChest = (Chest) world.getBlockAt(chestX, chestY, chestZ).getState();
-                        newChest.getInventory().clear();
-
-                        chests = addChest(chests, newChest);
-                    }
-
-                    //will not override a non-empty slot
-                    boolean isValidItemSlot = false;
-                    while(isValidItemSlot == false) {
-
-                        int chosenChest = (int) (Math.random() * numberOfChests);
-                        int chosenSlot = (int) (Math.random() * 27);
-                        int chosenItem = 0;
-
-                        chosenItem = (int) (Math.random() * variableLoot.length);
-
-                        //if slot is empty
-                        if(chests[chosenChest].getInventory().getItem(chosenSlot) == null || variableLoot.length == 0) {
-                            Bukkit.getLogger().info("Good! " + chests[chosenChest].getInventory().getItem(chosenSlot) + ", slot + " + chosenSlot);
-
-                            if(variableLoot.length != 0) {
-                                chests[chosenChest].getInventory().setItem(chosenSlot, variableLoot[chosenItem]);
-                            }
-
-                            isValidItemSlot = true;
-                        } else {
-                            Bukkit.getLogger().info("Was not valid!");
-                        }
-                    }
-
-                }
-            }
-
+        String templateWorldName = plugin.getConfig().getString("template_world");
+        List<World> worlds = Bukkit.getWorlds();
+        List<String> worldNames = new ArrayList<String>();
+        for(World world : worlds) {
+            worldNames.add(world.getName());
         }
+
+        World templateWorld = Bukkit.getServer().getWorld(templateWorldName);
+
+
+        if(templateWorld != null) {
+            plugin.unloadWorld(templateWorld);
+
+            File gameWorldFolder;
+
+            if(worldNames.contains(templateWorldName + "_game")) {
+                plugin.unloadWorld(Bukkit.getWorld(templateWorldName + "_game"));
+            }
+
+            if(plugin.unloadWorld(Bukkit.getServer().getWorld(templateWorldName))) {
+                gameWorldFolder = new File(Bukkit.getWorldContainer(), templateWorldName + "_game");
+                plugin.copyWorld(templateWorld.getWorldFolder(), gameWorldFolder);
+
+                Bukkit.getServer().createWorld(new WorldCreator(gameWorldFolder.getName()));
+
+                World gameWorld = Bukkit.getServer().getWorld(gameWorldFolder.getName());
+
+                fillChests(sender, gameWorld);
+
+                if(sender instanceof Player) {
+                    Player p = (Player) sender;
+                    Location location = gameWorld.getSpawnLocation();
+                    p.teleport(location);
+                }
+
+                returnMessage = ChatColor.AQUA + "World successfully created!";
+
+            } else {
+                returnMessage = ChatColor.RED + "Error! Something went wrong when unloading the template world!";
+            }
+
+        } else {
+            returnMessage = ChatColor.RED + "Error! You need to set a template world! Use the \"/skywars config\" command!";
+        }
+
 
         sender.sendMessage(returnMessage);
     }
@@ -701,6 +662,35 @@ public class SkywarsCommand implements CommandExecutor {
     }
 
 
+    //run when "/skywars endgame" is sent
+    private void endGame(String[] args, CommandSender sender) {
+        String returnMessage = "";
+
+        String lobbyName = plugin.getConfig().getString("lobby_world");
+        World gameWorld = Bukkit.getWorld(plugin.getConfig().getString("template_world") + "_game");
+
+
+        Bukkit.getServer().createWorld(new WorldCreator(lobbyName));
+
+        if(worldExists(lobbyName)) {
+            if(gameWorld != null) {
+                List<Player> players = gameWorld.getPlayers();
+                World lobbyWorld = Bukkit.getWorld(lobbyName);
+                Location loc = lobbyWorld.getSpawnLocation();
+                for(Player player : players) {
+                    Bukkit.dispatchCommand(player, "lobby");
+                }
+            }
+
+            plugin.removeWorld(gameWorld.getWorldFolder());
+            returnMessage = ChatColor.AQUA + "Success! World deleted";
+        } else {
+            returnMessage = ChatColor.RED + "Lobby world not found!";
+        }
+
+        sender.sendMessage(returnMessage);
+    }
+
 
     // method to check if a text string is an integer
     public static boolean isParsable(String input) {
@@ -762,5 +752,126 @@ public class SkywarsCommand implements CommandExecutor {
         return newArray;
     }
 
+    //fills all the chests
+    public void fillChests(CommandSender sender, World w) {
+        if(!areAllChestsSet()) {
+            sender.sendMessage(ChatColor.RED + "You need to set all the chest locations for the islands!\nUse \"/skywars chests info\" to see what's missing!");
+        } else {
+            int numberOfIslands = plugin.getChestInfo().getInt("numberOfIslands");
 
+            ItemStack[] islandLoot = new ItemStack[0];
+            ItemStack[] midLoot = new ItemStack[0];
+
+            //creating the list of items that can be selected
+            for(int i = 0; i < 45; i++) {
+                ItemStack newIslandItem = plugin.getLoot().getItemStack("islandloot." + i);
+                if(newIslandItem != null) {
+                    islandLoot = addItem(islandLoot, newIslandItem);
+                }
+
+                ItemStack newMidItem = plugin.getLoot().getItemStack("midloot." + i);
+                if(newMidItem != null) {
+                    midLoot = addItem(midLoot, newMidItem);
+                }
+            }
+
+            // REMEMBER TO CHANGE THIS TO BE THE GAME WORLD INSTEAD OF THE TEMPLATE WORLD! VERY IMPORTANT!
+            //String worldName = plugin.getConfig().getString("template_world");
+            //World world = Bukkit.getWorld(worldName);
+            World world = w;
+
+
+            if(world == null) {
+                sender.sendMessage(ChatColor.RED + "You need a valid template world! Set it by using \"/skywars config templateworld\"");
+            } else {
+                //for each island...
+                for(int i = 0; i <= numberOfIslands; i++) {
+
+                    int numberOfChests = howManyChests(i);
+                    ItemStack[] variableLoot;
+                    if(i == 0) {
+                        variableLoot = midLoot;
+                    } else {
+                        variableLoot = islandLoot;
+                    }
+
+                    int numItems = 0;
+
+                    if(i == 0) {
+                        numItems = 27;
+                    } else {
+                        numItems = 14;
+                    }
+
+
+                    Chest[] chests = new Chest[0];
+
+                    //for every chest in the length...
+                    for(int c = 1; c <= numberOfChests; c++) {
+                        int chestX = plugin.getChestInfo().getInt("island_" + i + "_" + c + ".x");
+                        int chestY = plugin.getChestInfo().getInt("island_" + i + "_" + c + ".y");
+                        int chestZ = plugin.getChestInfo().getInt("island_" + i + "_" + c + ".z");
+
+                        if(world.getBlockAt(chestX, chestY, chestZ).getType() != Material.CHEST) {
+                            world.getBlockAt(chestX, chestY, chestZ).setType(Material.CHEST);
+                        }
+
+                        //Chest newChest = (Chest) world.getBlockAt(chestX, chestY, chestZ).getBlockData();
+                        Chest newChest = (Chest) world.getBlockAt(chestX, chestY, chestZ).getState();
+                        newChest.getInventory().clear();
+
+                        chests = addChest(chests, newChest);
+                    }
+
+
+
+                    //for every item to add to a chest...
+                    for(int j = 0; j < numItems; j++) {
+
+                        //will not override a non-empty slot
+                        boolean isValidItemSlot = false;
+                        while(isValidItemSlot == false) {
+
+                            int chosenChest = (int) (Math.random() * numberOfChests);
+                            int chosenSlot = (int) (Math.random() * 27);
+                            int chosenItemNumber = 0;
+
+                            chosenItemNumber = (int) (Math.random() * variableLoot.length);
+
+                            //if slot is empty
+                            if(chests[chosenChest].getInventory().getItem(chosenSlot) == null || variableLoot.length == 0) {
+
+                                if(variableLoot.length != 0) {
+                                    //Bukkit.getLogger().info("Good! " + chests[chosenChest].getInventory().getItem(chosenSlot) + ", chest " + chosenChest + ", slot " + chosenSlot + ", chosenItemNumber = " + chosenItemNumber);
+                                    chests[chosenChest].getInventory().setItem(chosenSlot, variableLoot[chosenItemNumber]);
+                                } else {
+                                    //Bukkit.getLogger().info("variableLoot.length = 0");
+                                }
+
+                                isValidItemSlot = true;
+                            } else {
+                                //Bukkit.getLogger().info("Was not valid!");
+                            }
+                        }
+
+                    }
+                }
+            }
+
+        }
+    }
+
+    //checks if a world exists
+    private boolean worldExists(String worldName) {
+        List<World> worlds = Bukkit.getWorlds();
+        List<String> worldNames = new ArrayList<String>();
+        for(World world : worlds) {
+            worldNames.add(world.getName());
+        }
+        if(worldNames.contains(worldName)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

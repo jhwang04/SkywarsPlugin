@@ -1,16 +1,21 @@
 package com.justinhwang.skywarsplugin;
 
+import com.justinhwang.skywarsplugin.commands.LobbyCommand;
 import com.justinhwang.skywarsplugin.commands.SkywarsCommand;
 import com.justinhwang.skywarsplugin.events.LootConfig;
+import com.justinhwang.skywarsplugin.events.SendToLobby;
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
+import org.bukkit.World;
+import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.Arrays;
+import java.util.List;
 
 public class SkywarsPlugin extends JavaPlugin {
 
@@ -48,7 +53,11 @@ public class SkywarsPlugin extends JavaPlugin {
         //registering the command
         getCommand("skywars").setExecutor(new SkywarsCommand(this));
 
+        getCommand("lobby").setExecutor(new LobbyCommand(this));
+
         getServer().getPluginManager().registerEvents(new LootConfig(this), this);
+
+        getServer().getPluginManager().registerEvents(new SendToLobby((this)), this);
 
         getLogger().info("Skywars plugin has been enabled");
     }
@@ -90,4 +99,73 @@ public class SkywarsPlugin extends JavaPlugin {
     public Player getPlayerConfiguringLoot() {return playerConfiguringLoot;}
 
     public void setPlayerConfiguringLoot(Player p) {this.playerConfiguringLoot = p;}
+
+
+    //For resetting the world
+
+    public boolean unloadWorld(World world) {
+        if(!world.equals(null)) {
+            Bukkit.getServer().unloadWorld(world, false);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    //COPIED FROM BUKKIT FORUMS, https://bukkit.org/threads/unload-delete-copy-worlds.182814/
+    public void copyWorld(File source, File target) {
+        List<String> filesToIgnore = Arrays.asList("uid.dat", "session.lock", "playerdata");
+        try {
+            if(!filesToIgnore.contains(source.getName())) {
+                if(source.isDirectory()) {
+                    if(!target.exists()) {
+                        if(!target.mkdirs()) {
+                            throw new IOException("Could not create world directory");
+                        }
+                    }
+                    String[] files = source.list();
+                    for(String file : files) {
+                        File sourceFile = new File(source, file);
+                        File targetFile = new File(target, file);
+                        copyWorld(sourceFile, targetFile);
+                    }
+                } else {
+                    FileInputStream in = new FileInputStream(source);
+                    FileOutputStream out = new FileOutputStream(target);
+                    byte[] buffer = new byte[1024];
+                    int length;
+
+                    while((length = in.read(buffer)) > 0) {
+                        out.write(buffer, 0, length);
+                    }
+
+                    in.close();
+                    out.close();
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean removeWorld(File worldFile) {
+        /*if(!world.equals(null)) {
+            File worldFolder = world.getWorldFolder();
+            worldFolder.delete();
+            return true;
+        } else {
+            return false;
+        }*/
+        if(worldFile.exists()) {
+            File files[] = worldFile.listFiles();
+            for(int f = 0; f < files.length; f++) {
+                if(files[f].isDirectory() == true) {
+                    removeWorld(files[f]);
+                } else {
+                    files[f].delete();
+                }
+            }
+        }
+        return worldFile.delete();
+    }
 }
