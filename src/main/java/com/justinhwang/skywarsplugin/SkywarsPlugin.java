@@ -4,10 +4,7 @@ import com.justinhwang.skywarsplugin.commands.LobbyCommand;
 import com.justinhwang.skywarsplugin.commands.SkywarsCommand;
 import com.justinhwang.skywarsplugin.events.LootConfig;
 import com.justinhwang.skywarsplugin.events.SendToLobby;
-import org.bukkit.Bukkit;
-import org.bukkit.Server;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
+import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -59,7 +56,21 @@ public class SkywarsPlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new SendToLobby((this)), this);
 
+
+        String lobbyWorldName = getConfig().getString("lobby_world");
+        World lobbyWorld = Bukkit.getWorld(lobbyWorldName);
+        if(lobbyWorld == null) {
+            Bukkit.createWorld(new WorldCreator(lobbyWorldName));
+            Bukkit.getLogger().info(ChatColor.GOLD + "Lobby world loaded");
+        }
+
+
         getLogger().info("Skywars plugin has been enabled");
+    }
+
+    @Override
+    public void onDisable() {
+
     }
 
     public FileConfiguration getChestInfo() {
@@ -99,6 +110,19 @@ public class SkywarsPlugin extends JavaPlugin {
     public Player getPlayerConfiguringLoot() {return playerConfiguringLoot;}
 
     public void setPlayerConfiguringLoot(Player p) {this.playerConfiguringLoot = p;}
+
+    public void resetPlayerValues(Player p) {
+        p.getInventory().clear();
+        p.setGameMode(GameMode.ADVENTURE);
+        p.getActivePotionEffects().clear();
+        p.setExp(0);
+        p.setFlying(false);
+        p.setSwimming(false);
+        p.setItemOnCursor(null);
+        p.setFoodLevel(20);
+        p.setHealth(20.0);
+        p.setSaturation(20f);
+    }
 
 
     //For resetting the world
@@ -167,5 +191,21 @@ public class SkywarsPlugin extends JavaPlugin {
             }
         }
         return worldFile.delete();
+    }
+
+    public void broadcastToPlayers(String title, String subtitle, World world) {
+        List<Player> players = world.getPlayers();
+
+        for(Player p : players) {
+            p.sendTitle(title, subtitle, 10, 70, 20);
+        }
+    }
+
+    public void broadcastToPlayers(String title, String subtitle, World world, int fadeIn, int stay, int fadeOut) {
+        List<Player> players = world.getPlayers();
+
+        for(Player p : players) {
+            p.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+        }
     }
 }

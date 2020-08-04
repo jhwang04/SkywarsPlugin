@@ -1,4 +1,447 @@
-# This file lists all the items that can be found in chests, both on islands and on the middle island.
 islandloot:
-
+  '0':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: LEATHER_HELMET
+  '1':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: LEATHER_CHESTPLATE
+  '2':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: LEATHER_LEGGINGS
+  '3':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: LEATHER_BOOTS
+  '4':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: IRON_HELMET
+  '5':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: IRON_LEGGINGS
+  '6':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: IRON_CHESTPLATE
+  '7':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: IRON_BOOTS
+  '8':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: WOODEN_SWORD
+    meta:
+      ==: ItemMeta
+      meta-type: UNSPECIFIC
+      enchants:
+        DAMAGE_ALL: 2
+  '9':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: STONE
+    amount: 12
+  '10':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: OAK_PLANKS
+    amount: 20
+  '11':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: STONE
+    amount: 8
+  '12':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: OAK_PLANKS
+    amount: 12
+  '13':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: OAK_PLANKS
+    amount: 8
+  '14':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: STONE
+    amount: 20
+  '15':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: STONE_SWORD
+  '16':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: IRON_SWORD
+  '17':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: WOODEN_AXE
+  '18':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: STONE_AXE
+  '19':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: BOW
+  '20':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: ARROW
+    amount: 8
+  '21':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: LEATHER_CHESTPLATE
+  '22':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: LEATHER_BOOTS
+  '23':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: IRON_HELMET
+  '24':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: IRON_LEGGINGS
+  '25':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: IRON_CHESTPLATE
+  '26':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: IRON_BOOTS
+  '27':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: ARROW
+    amount: 12
+  '28':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: SHIELD
+  '29':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: DIAMOND_PICKAXE
+  '30':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: FLINT_AND_STEEL
+  '31':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: SPLASH_POTION
+    meta:
+      ==: ItemMeta
+      meta-type: POTION
+      potion-type: minecraft:strong_swiftness
+  '34':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: CROSSBOW
+  '35':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: LEATHER_HELMET
+  '36':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: TNT
+    amount: 4
+  '37':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: WATER_BUCKET
+  '38':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: LAVA_BUCKET
+  '44':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: LEATHER_LEGGINGS
+  '32':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: EXPERIENCE_BOTTLE
+    amount: 16
+  '33':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: ENCHANTING_TABLE
+  '43':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: EXPERIENCE_BOTTLE
+    amount: 64
+  '39':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: LAPIS_LAZULI
+    amount: 16
+  '40':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: LAPIS_LAZULI
+    amount: 16
 midloot:
+  '0':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: DIAMOND_SWORD
+  '1':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: IRON_SWORD
+    meta:
+      ==: ItemMeta
+      meta-type: UNSPECIFIC
+      enchants:
+        DAMAGE_ALL: 2
+  '2':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: NETHERITE_SWORD
+  '3':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: NETHERITE_SWORD
+    meta:
+      ==: ItemMeta
+      meta-type: UNSPECIFIC
+      enchants:
+        DAMAGE_ALL: 1
+  '4':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: DIAMOND_AXE
+  '5':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: NETHERITE_AXE
+  '6':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: DIAMOND_HELMET
+  '7':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: DIAMOND_CHESTPLATE
+  '8':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: DIAMOND_LEGGINGS
+  '9':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: DIAMOND_BOOTS
+  '10':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: NETHERITE_HELMET
+  '11':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: NETHERITE_INGOT
+  '12':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: NETHERITE_INGOT
+  '14':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: EXPERIENCE_BOTTLE
+    amount: 32
+  '15':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: EXPERIENCE_BOTTLE
+    amount: 32
+  '16':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: SPLASH_POTION
+    meta:
+      ==: ItemMeta
+      meta-type: POTION
+      potion-type: minecraft:strong_turtle_master
+  '17':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: SPLASH_POTION
+    meta:
+      ==: ItemMeta
+      meta-type: POTION
+      potion-type: minecraft:strong_harming
+  '18':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: SPLASH_POTION
+    meta:
+      ==: ItemMeta
+      meta-type: POTION
+      potion-type: minecraft:strong_harming
+  '19':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: LINGERING_POTION
+    meta:
+      ==: ItemMeta
+      meta-type: POTION
+      potion-type: minecraft:poison
+  '20':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: POTION
+    meta:
+      ==: ItemMeta
+      meta-type: POTION
+      potion-type: minecraft:fire_resistance
+  '21':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: SPLASH_POTION
+    meta:
+      ==: ItemMeta
+      meta-type: POTION
+      potion-type: minecraft:strong_healing
+  '22':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: SPLASH_POTION
+    meta:
+      ==: ItemMeta
+      meta-type: POTION
+      potion-type: minecraft:strong_healing
+  '23':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: TIPPED_ARROW
+    amount: 16
+    meta:
+      ==: ItemMeta
+      meta-type: POTION
+      potion-type: minecraft:weakness
+  '24':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: TIPPED_ARROW
+    amount: 16
+    meta:
+      ==: ItemMeta
+      meta-type: POTION
+      potion-type: minecraft:poison
+  '25':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: SPECTRAL_ARROW
+    amount: 16
+  '26':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: TIPPED_ARROW
+    amount: 16
+    meta:
+      ==: ItemMeta
+      meta-type: POTION
+      potion-type: minecraft:slowness
+  '27':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: TIPPED_ARROW
+    amount: 4
+    meta:
+      ==: ItemMeta
+      meta-type: POTION
+      potion-type: minecraft:strong_turtle_master
+  '28':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: ARROW
+    amount: 64
+  '29':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: ENCHANTING_TABLE
+  '30':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: SHIELD
+  '31':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: BOW
+    meta:
+      ==: ItemMeta
+      meta-type: UNSPECIFIC
+      enchants:
+        ARROW_DAMAGE: 2
+  '32':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: CROSSBOW
+  '33':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: STONE_SWORD
+    meta:
+      ==: ItemMeta
+      meta-type: UNSPECIFIC
+      enchants:
+        FIRE_ASPECT: 2
+  '34':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: CROSSBOW
+    meta:
+      ==: ItemMeta
+      meta-type: CROSSBOW
+      enchants:
+        QUICK_CHARGE: 3
+      charged: false
+  '35':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: COD
+    meta:
+      ==: ItemMeta
+      meta-type: UNSPECIFIC
+      display-name: Fish Slap
+      lore:
+        - Smack someone with fresh sushi!
+      enchants:
+        KNOCKBACK: 2
+  '36':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: LAPIS_LAZULI
+    amount: 16
+  '37':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: LAPIS_LAZULI
+    amount: 16
+  '38':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: LAPIS_LAZULI
+    amount: 16
+  '39':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: CUT_SANDSTONE
+    amount: 32
+  '40':
+    ==: org.bukkit.inventory.ItemStack
+    v: 2567
+    type: CUT_SANDSTONE
+    amount: 32

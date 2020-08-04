@@ -1,6 +1,8 @@
 package com.justinhwang.skywarsplugin.commands;
 
+import com.justinhwang.skywarsplugin.SkywarsGame;
 import com.justinhwang.skywarsplugin.SkywarsPlugin;
+import com.justinhwang.skywarsplugin.events.SendToLobby;
 import org.bukkit.*;
 //import org.bukkit.block.data.type.Chest;
 import org.bukkit.block.Chest;
@@ -23,6 +25,7 @@ import java.util.List;
 
 public class SkywarsCommand implements CommandExecutor {
     private Inventory templateInv = Bukkit.createInventory(null, 54, "Loot");
+    private SkywarsGame skywarsGame;
 
     private SkywarsPlugin plugin;
     private static String headerLine = ChatColor.AQUA + "-----------------------------------------------------\n";
@@ -130,6 +133,30 @@ public class SkywarsCommand implements CommandExecutor {
                     break;
                 case "endgame":
                     endGame(args, sender);
+                    break;
+                case "template":
+                    if(sender instanceof Player) {
+                        Player p = (Player) sender;
+                        World w = Bukkit.getWorld(plugin.getConfig().getString("template_world"));
+                        if(w == null) {
+                            Bukkit.createWorld(new WorldCreator(w.getName()));
+                            w = Bukkit.getWorld(w.getName());
+                        }
+                        Location location = w.getSpawnLocation();
+                        p.teleport(location);
+                    }
+                    break;
+                case "gameworld":
+                    if(sender instanceof Player) {
+                        Player p = (Player) sender;
+                        World w = Bukkit.getWorld(plugin.getConfig().getString("template_world") + "_game");
+                        if(w == null) {
+                            Bukkit.createWorld(new WorldCreator(w.getName()));
+                            w = Bukkit.getWorld(w.getName());
+                        }
+                        Location location = w.getSpawnLocation();
+                        p.teleport(location);
+                    }
                     break;
                 default:
                     sender.sendMessage(ChatColor.GOLD + "Type \"/skywars help\" for a list of commands!");
@@ -294,7 +321,7 @@ public class SkywarsCommand implements CommandExecutor {
                         }
                     } else {
                         returnMessage = headerLine;
-                        returnMessage += ChatColor.GOLD + "                   Chest Info\n";
+                        returnMessage += ChatColor.GOLD + "                            Chest Info\n";
                         returnMessage += "Use \"/skywars chests info <island #>\" for specific details.\n";
                         returnMessage += headerLine;
 
@@ -484,7 +511,7 @@ public class SkywarsCommand implements CommandExecutor {
                 case "info":
 
                     returnMessage = headerLine;
-                    returnMessage += ChatColor.GOLD + "                   Cage Info\n";
+                    returnMessage += ChatColor.GOLD + "                           Cage Info\n";
                     returnMessage += headerLine;
 
                     int numberOfIslands = chestInfo.getInt("numberOfIslands");
@@ -541,51 +568,43 @@ public class SkywarsCommand implements CommandExecutor {
 
     //run when "/skywars resetmap" is sent
     private void resetMap(String[] args, CommandSender sender) {
-        String returnMessage = "Placeholder for kicking players from world, and resetting the map";
-
-        sender.sendMessage(returnMessage);
-    }
-
-    //run when "/skywars startgame" is sent
-    private void startGame(String[] args, CommandSender sender) {
-        String returnMessage;
+        String returnMessage = "";
 
         String templateWorldName = plugin.getConfig().getString("template_world");
-        List<World> worlds = Bukkit.getWorlds();
-        List<String> worldNames = new ArrayList<String>();
-        for(World world : worlds) {
-            worldNames.add(world.getName());
-        }
-
         World templateWorld = Bukkit.getServer().getWorld(templateWorldName);
 
+        String gameWorldName = templateWorldName + "_game";
+        World gameWorld = Bukkit.getServer().getWorld(gameWorldName);
+        File gameWorldFolder = new File(Bukkit.getWorldContainer(), gameWorldName);
+
+        //if the game world exists and is not empty, teleport all players to the lobby
+        if(gameWorld != null) {
+            if(gameWorld.getPlayers().size() != 0) {
+                for(Player player : gameWorld.getPlayers()) {
+                    Bukkit.dispatchCommand(player, "lobby");
+                }
+            }
+            plugin.unloadWorld(gameWorld);
+        }
 
         if(templateWorld != null) {
             plugin.unloadWorld(templateWorld);
 
-            File gameWorldFolder;
-
-            if(worldNames.contains(templateWorldName + "_game")) {
-                plugin.unloadWorld(Bukkit.getWorld(templateWorldName + "_game"));
-            }
-
+            //unload the template world so it can be copied
             if(plugin.unloadWorld(Bukkit.getServer().getWorld(templateWorldName))) {
-                gameWorldFolder = new File(Bukkit.getWorldContainer(), templateWorldName + "_game");
+
+                plugin.removeWorld(gameWorldFolder);
                 plugin.copyWorld(templateWorld.getWorldFolder(), gameWorldFolder);
 
-                Bukkit.getServer().createWorld(new WorldCreator(gameWorldFolder.getName()));
+                Bukkit.getServer().createWorld(new WorldCreator(gameWorldName));
 
-                World gameWorld = Bukkit.getServer().getWorld(gameWorldFolder.getName());
+                gameWorld = Bukkit.getServer().getWorld(gameWorldName);
+
+
 
                 fillChests(sender, gameWorld);
 
-                if(sender instanceof Player) {
-                    Player p = (Player) sender;
-                    Location location = gameWorld.getSpawnLocation();
-                    p.teleport(location);
-                }
-
-                returnMessage = ChatColor.AQUA + "World successfully created!";
+                returnMessage = ChatColor.AQUA + "Game world successfully reset";
 
             } else {
                 returnMessage = ChatColor.RED + "Error! Something went wrong when unloading the template world!";
@@ -595,8 +614,51 @@ public class SkywarsCommand implements CommandExecutor {
             returnMessage = ChatColor.RED + "Error! You need to set a template world! Use the \"/skywars config\" command!";
         }
 
-
         sender.sendMessage(returnMessage);
+    }
+
+    //run when "/skywars startgame" is sent
+    private void startGame(String[] args, CommandSender sender) {
+        //String returnMessage = "";
+        //sender.sendMessage(returnMessage);
+
+        World gameWorld = Bukkit.getWorld(plugin.getConfig().getString("template_world") + "_game");
+        int totalPlayers = plugin.getChestInfo().getInt("numberOfIslands");
+
+        if(gameWorld != null) {
+
+            if(skywarsGame == null) {
+                List<Player> players = gameWorld.getPlayers();
+                if(players.size() != 0) {
+                    if(players.size() <= totalPlayers) {
+
+                        this.skywarsGame = new SkywarsGame(-25, players, gameWorld, plugin);
+                        skywarsGame.startGame();
+
+                    } else {
+                        //if there are too many players...
+                        plugin.broadcastToPlayers(ChatColor.RED + "Too many players!", ChatColor.RED + "Cannot start game", gameWorld);
+                    }
+                } else {
+                    sender.sendMessage(ChatColor.RED + "No players in the world. Game not started.");
+                }
+            } else {
+                sender.sendMessage(ChatColor.RED + "Game already in progress!");
+            }
+
+        } else {
+            sender.sendMessage(ChatColor.RED + "No game world found! Use \"/skywars resetmap\" to re-create the world from the template!");
+        }
+    }
+
+    private void endGame(String[] args, CommandSender sender) {
+        if (skywarsGame != null) {
+            this.skywarsGame.endGame();
+            this.skywarsGame = null;
+            sender.sendMessage(ChatColor.AQUA + "Game ended!");
+        } else {
+            sender.sendMessage(ChatColor.AQUA + "No game in progress to end");
+        }
     }
 
     //run when "/skywars config" is sent
@@ -656,36 +718,6 @@ public class SkywarsCommand implements CommandExecutor {
             }
         } else {
             returnMessage = ChatColor.RED + "Usage: /skywars config <lobbyworld/templateworld>";
-        }
-
-        sender.sendMessage(returnMessage);
-    }
-
-
-    //run when "/skywars endgame" is sent
-    private void endGame(String[] args, CommandSender sender) {
-        String returnMessage = "";
-
-        String lobbyName = plugin.getConfig().getString("lobby_world");
-        World gameWorld = Bukkit.getWorld(plugin.getConfig().getString("template_world") + "_game");
-
-
-        Bukkit.getServer().createWorld(new WorldCreator(lobbyName));
-
-        if(worldExists(lobbyName)) {
-            if(gameWorld != null) {
-                List<Player> players = gameWorld.getPlayers();
-                World lobbyWorld = Bukkit.getWorld(lobbyName);
-                Location loc = lobbyWorld.getSpawnLocation();
-                for(Player player : players) {
-                    Bukkit.dispatchCommand(player, "lobby");
-                }
-            }
-
-            plugin.removeWorld(gameWorld.getWorldFolder());
-            returnMessage = ChatColor.AQUA + "Success! World deleted";
-        } else {
-            returnMessage = ChatColor.RED + "Lobby world not found!";
         }
 
         sender.sendMessage(returnMessage);
