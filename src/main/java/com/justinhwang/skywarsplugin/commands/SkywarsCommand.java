@@ -25,7 +25,6 @@ import java.util.List;
 
 public class SkywarsCommand implements CommandExecutor {
     private Inventory templateInv = Bukkit.createInventory(null, 54, "Loot");
-    private SkywarsGame skywarsGame;
 
     private SkywarsPlugin plugin;
     private static String headerLine = ChatColor.AQUA + "-----------------------------------------------------\n";
@@ -33,6 +32,7 @@ public class SkywarsCommand implements CommandExecutor {
             ChatColor.AQUA + "-----------------------------------------------------\n" +
             ChatColor.GOLD + "                          Skywars Help\n" +
             ChatColor.GOLD + "   Type \"/skywars help <islands/chests/etc>\" for more info.\n" +
+            ChatColor.GOLD + "      Use \"/skywars help dev\" for debug admin commands\n" +
             ChatColor.AQUA + "-----------------------------------------------------\n" +
             ChatColor.GOLD + "- /skywars islands\n" +
             ChatColor.GRAY + "   - Edit the number of player spawn islands on your map.\n" +
@@ -151,12 +151,19 @@ public class SkywarsCommand implements CommandExecutor {
                         Player p = (Player) sender;
                         World w = Bukkit.getWorld(plugin.getConfig().getString("template_world") + "_game");
                         if(w == null) {
-                            Bukkit.createWorld(new WorldCreator(w.getName()));
-                            w = Bukkit.getWorld(w.getName());
+                            resetMap(args, sender);
+                            w = Bukkit.getWorld(plugin.getConfig().getString("template_world") + "_game");
                         }
                         Location location = w.getSpawnLocation();
                         p.teleport(location);
                     }
+                    break;
+                case "fillchests":
+                    fillChests(sender, Bukkit.getWorld(plugin.getConfig().getString("template_world") + "_game"), false);
+                    break;
+                case "pausegame":
+                    plugin.skywarsGame.setTimerGoing(false);
+                    sender.sendMessage(ChatColor.AQUA + "Game paused! Resume with \"/skywars startgame\"");
                     break;
                 default:
                     sender.sendMessage(ChatColor.GOLD + "Type \"/skywars help\" for a list of commands!");
@@ -237,6 +244,23 @@ public class SkywarsCommand implements CommandExecutor {
                             ChatColor.GOLD + "- /skywars config templateworld <info/set>\n" +
                             ChatColor.GRAY + "   - Check/set the world that is designated as the template, that is copied for each skywars game.";
                     break;
+                case "dev":
+                    message =
+                            headerLine +
+                            ChatColor.GOLD + "                 Skywars Dev Commands\n" +
+                            headerLine +
+                            ChatColor.GOLD + "- /skywars endgame\n" +
+                            ChatColor.GRAY + "   - Immediately kills the active game.\n" +
+                            ChatColor.GOLD + "- /skywars template\n" +
+                            ChatColor.GRAY + "   - Teleports the player to the template world.\n" +
+                            ChatColor.GOLD + "- /skywars gameworld\n" +
+                            ChatColor.GRAY + "   - Teleports the player to the current game world.\n" +
+                            ChatColor.GOLD + "- /skywars fillchests\n" +
+                            ChatColor.GRAY + "   - Immediately refills all the chests.\n" +
+                            ChatColor.GOLD + "- /skywars pausegame\n" +
+                            ChatColor.GRAY + "   - Immediately pauses the current game, but does not end it";
+                    break;
+
                 default:
                     message = defaultHelpMessage;
                     break;
@@ -570,6 +594,10 @@ public class SkywarsCommand implements CommandExecutor {
     private void resetMap(String[] args, CommandSender sender) {
         String returnMessage = "";
 
+        if(plugin.skywarsGame != null) {
+            plugin.skywarsGame.kill();
+        }
+
         String templateWorldName = plugin.getConfig().getString("template_world");
         World templateWorld = Bukkit.getServer().getWorld(templateWorldName);
 
@@ -600,9 +628,10 @@ public class SkywarsCommand implements CommandExecutor {
 
                 gameWorld = Bukkit.getServer().getWorld(gameWorldName);
 
+                fillChests(sender, gameWorld, true);
 
-
-                fillChests(sender, gameWorld);
+                plugin.skywarsGame = new SkywarsGame(-25, gameWorld.getPlayers(), gameWorld, plugin, false);
+                plugin.skywarsGame.startGame();
 
                 returnMessage = ChatColor.AQUA + "Game world successfully reset";
 
@@ -622,7 +651,7 @@ public class SkywarsCommand implements CommandExecutor {
         //String returnMessage = "";
         //sender.sendMessage(returnMessage);
 
-        World gameWorld = Bukkit.getWorld(plugin.getConfig().getString("template_world") + "_game");
+        /*World gameWorld = Bukkit.getWorld(plugin.getConfig().getString("template_world") + "_game");
         int totalPlayers = plugin.getChestInfo().getInt("numberOfIslands");
 
         if(gameWorld != null) {
@@ -632,7 +661,7 @@ public class SkywarsCommand implements CommandExecutor {
                 if(players.size() != 0) {
                     if(players.size() <= totalPlayers) {
 
-                        this.skywarsGame = new SkywarsGame(-25, players, gameWorld, plugin);
+                        this.skywarsGame = new SkywarsGame(-25, players, gameWorld, plugin, false);
                         skywarsGame.startGame();
 
                     } else {
@@ -648,13 +677,13 @@ public class SkywarsCommand implements CommandExecutor {
 
         } else {
             sender.sendMessage(ChatColor.RED + "No game world found! Use \"/skywars resetmap\" to re-create the world from the template!");
-        }
+        }*/
+        plugin.skywarsGame.setTimerGoing(true);
     }
 
     private void endGame(String[] args, CommandSender sender) {
-        if (skywarsGame != null) {
-            this.skywarsGame.endGame();
-            this.skywarsGame = null;
+        if (plugin.skywarsGame != null) {
+            plugin.skywarsGame.endGame();
             sender.sendMessage(ChatColor.AQUA + "Game ended!");
         } else {
             sender.sendMessage(ChatColor.AQUA + "No game in progress to end");
@@ -785,7 +814,7 @@ public class SkywarsCommand implements CommandExecutor {
     }
 
     //fills all the chests
-    public void fillChests(CommandSender sender, World w) {
+    public void fillChests(CommandSender sender, World w, boolean replace) {
         if(!areAllChestsSet()) {
             sender.sendMessage(ChatColor.RED + "You need to set all the chest locations for the islands!\nUse \"/skywars chests info\" to see what's missing!");
         } else {
@@ -850,7 +879,11 @@ public class SkywarsCommand implements CommandExecutor {
 
                         //Chest newChest = (Chest) world.getBlockAt(chestX, chestY, chestZ).getBlockData();
                         Chest newChest = (Chest) world.getBlockAt(chestX, chestY, chestZ).getState();
-                        newChest.getInventory().clear();
+
+                        if(replace == true) {
+                            newChest.getInventory().clear();
+                        }
+
 
                         chests = addChest(chests, newChest);
                     }
@@ -862,7 +895,8 @@ public class SkywarsCommand implements CommandExecutor {
 
                         //will not override a non-empty slot
                         boolean isValidItemSlot = false;
-                        while(isValidItemSlot == false) {
+                        int attempts = 0;
+                        while(isValidItemSlot == false || attempts > 10) {
 
                             int chosenChest = (int) (Math.random() * numberOfChests);
                             int chosenSlot = (int) (Math.random() * 27);
@@ -884,6 +918,7 @@ public class SkywarsCommand implements CommandExecutor {
                             } else {
                                 //Bukkit.getLogger().info("Was not valid!");
                             }
+                            attempts++;
                         }
 
                     }

@@ -3,12 +3,17 @@ package com.justinhwang.skywarsplugin;
 import com.justinhwang.skywarsplugin.commands.LobbyCommand;
 import com.justinhwang.skywarsplugin.commands.SkywarsCommand;
 import com.justinhwang.skywarsplugin.events.LootConfig;
+import com.justinhwang.skywarsplugin.events.PlayersInSkywarsGame;
 import com.justinhwang.skywarsplugin.events.SendToLobby;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
+import org.bukkit.scoreboard.Scoreboard;
 
 import java.io.*;
 import java.util.Arrays;
@@ -23,6 +28,8 @@ public class SkywarsPlugin extends JavaPlugin {
     private FileConfiguration config;
     private FileConfiguration chestInfo;
     private FileConfiguration loot;
+
+    public SkywarsGame skywarsGame;
 
     private Player playerConfiguringLoot;
 
@@ -54,7 +61,9 @@ public class SkywarsPlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new LootConfig(this), this);
 
-        getServer().getPluginManager().registerEvents(new SendToLobby((this)), this);
+        getServer().getPluginManager().registerEvents(new SendToLobby(this), this);
+
+        getServer().getPluginManager().registerEvents(new PlayersInSkywarsGame(this), this);
 
 
         String lobbyWorldName = getConfig().getString("lobby_world");
@@ -63,6 +72,8 @@ public class SkywarsPlugin extends JavaPlugin {
             Bukkit.createWorld(new WorldCreator(lobbyWorldName));
             Bukkit.getLogger().info(ChatColor.GOLD + "Lobby world loaded");
         }
+
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "skywars resetmap");
 
 
         getLogger().info("Skywars plugin has been enabled");
@@ -122,6 +133,8 @@ public class SkywarsPlugin extends JavaPlugin {
         p.setFoodLevel(20);
         p.setHealth(20.0);
         p.setSaturation(20f);
+
+        p.getScoreboard().clearSlot(DisplaySlot.SIDEBAR);
     }
 
 
@@ -208,4 +221,6 @@ public class SkywarsPlugin extends JavaPlugin {
             p.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
         }
     }
+
+
 }
