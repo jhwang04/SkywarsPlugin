@@ -1,19 +1,15 @@
 package com.justinhwang.skywarsplugin;
 
 import com.justinhwang.skywarsplugin.commands.LobbyCommand;
+import com.justinhwang.skywarsplugin.commands.PlaySkywarsCommand;
 import com.justinhwang.skywarsplugin.commands.SkywarsCommand;
-import com.justinhwang.skywarsplugin.events.LootConfig;
-import com.justinhwang.skywarsplugin.events.PlayersInSkywarsGame;
-import com.justinhwang.skywarsplugin.events.SendToLobby;
+import com.justinhwang.skywarsplugin.events.*;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
 
 import java.io.*;
 import java.util.Arrays;
@@ -59,12 +55,9 @@ public class SkywarsPlugin extends JavaPlugin {
 
         getCommand("lobby").setExecutor(new LobbyCommand(this));
 
+        getCommand("playskywars").setExecutor(new PlaySkywarsCommand(this));
+
         getServer().getPluginManager().registerEvents(new LootConfig(this), this);
-
-        getServer().getPluginManager().registerEvents(new SendToLobby(this), this);
-
-        getServer().getPluginManager().registerEvents(new PlayersInSkywarsGame(this), this);
-
 
         String lobbyWorldName = getConfig().getString("lobby_world");
         World lobbyWorld = Bukkit.getWorld(lobbyWorldName);
@@ -74,6 +67,14 @@ public class SkywarsPlugin extends JavaPlugin {
         }
 
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "skywars resetmap");
+
+        getServer().getPluginManager().registerEvents(new SendToLobby(this), this);
+
+        getServer().getPluginManager().registerEvents(new PlayersInSkywarsGame(this), this);
+
+        getServer().getPluginManager().registerEvents(new PlayerDeaths(this), this);
+
+        getServer().getPluginManager().registerEvents(new BoundaryLock(this), this);
 
 
         getLogger().info("Skywars plugin has been enabled");
@@ -133,6 +134,7 @@ public class SkywarsPlugin extends JavaPlugin {
         p.setFoodLevel(20);
         p.setHealth(20.0);
         p.setSaturation(20f);
+        p.setExp(0.0f);
 
         p.getScoreboard().clearSlot(DisplaySlot.SIDEBAR);
     }

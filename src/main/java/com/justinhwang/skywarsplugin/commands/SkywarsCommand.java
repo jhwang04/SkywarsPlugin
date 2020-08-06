@@ -34,6 +34,8 @@ public class SkywarsCommand implements CommandExecutor {
             ChatColor.GOLD + "   Type \"/skywars help <islands/chests/etc>\" for more info.\n" +
             ChatColor.GOLD + "      Use \"/skywars help dev\" for debug admin commands\n" +
             ChatColor.AQUA + "-----------------------------------------------------\n" +
+            ChatColor.BOLD + "" + ChatColor.GOLD + "- /playskywars\n" +
+            ChatColor.RESET + "" + ChatColor.GRAY + "   - Sends the player to the game world!\n" +
             ChatColor.GOLD + "- /skywars islands\n" +
             ChatColor.GRAY + "   - Edit the number of player spawn islands on your map.\n" +
             ChatColor.GOLD + "- /skywars chests\n" +
@@ -42,8 +44,6 @@ public class SkywarsCommand implements CommandExecutor {
             ChatColor.GRAY + "   - Edit the chest loot tables.\n" +
             ChatColor.GOLD + "- /skywars cages\n" +
             ChatColor.GRAY + "   - Edit the location of each cage on each island.\n" +
-            ChatColor.GOLD + "- /skywars resetmap\n" +
-            ChatColor.GRAY + "   - Will generate a new skywars map from the template.\n" +
             ChatColor.GOLD + "- /skywars startgame\n" +
             ChatColor.GRAY + "   - Starts a game of skywars with the players in the game world.\n" +
             ChatColor.GOLD + "- /skywars config\n" +
@@ -146,18 +146,6 @@ public class SkywarsCommand implements CommandExecutor {
                         p.teleport(location);
                     }
                     break;
-                case "gameworld":
-                    if(sender instanceof Player) {
-                        Player p = (Player) sender;
-                        World w = Bukkit.getWorld(plugin.getConfig().getString("template_world") + "_game");
-                        if(w == null) {
-                            resetMap(args, sender);
-                            w = Bukkit.getWorld(plugin.getConfig().getString("template_world") + "_game");
-                        }
-                        Location location = w.getSpawnLocation();
-                        p.teleport(location);
-                    }
-                    break;
                 case "fillchests":
                     fillChests(sender, Bukkit.getWorld(plugin.getConfig().getString("template_world") + "_game"), false);
                     break;
@@ -249,16 +237,16 @@ public class SkywarsCommand implements CommandExecutor {
                             headerLine +
                             ChatColor.GOLD + "                 Skywars Dev Commands\n" +
                             headerLine +
-                            ChatColor.GOLD + "- /skywars endgame\n" +
-                            ChatColor.GRAY + "   - Immediately kills the active game.\n" +
+                            ChatColor.GOLD + "- /skywars resetmap\n" +
+                            ChatColor.GRAY + "   - Resets the map from the template, killing the active game.\n" +
                             ChatColor.GOLD + "- /skywars template\n" +
                             ChatColor.GRAY + "   - Teleports the player to the template world.\n" +
-                            ChatColor.GOLD + "- /skywars gameworld\n" +
-                            ChatColor.GRAY + "   - Teleports the player to the current game world.\n" +
                             ChatColor.GOLD + "- /skywars fillchests\n" +
                             ChatColor.GRAY + "   - Immediately refills all the chests.\n" +
                             ChatColor.GOLD + "- /skywars pausegame\n" +
-                            ChatColor.GRAY + "   - Immediately pauses the current game, but does not end it";
+                            ChatColor.GRAY + "   - Immediately pauses the current game, but does not end it\n" +
+                            ChatColor.GOLD + "- /skywars endgame\n" +
+                            ChatColor.GRAY + "   - Will end a game, if one is in progress, and reload the game map from a template.";
                     break;
 
                 default:

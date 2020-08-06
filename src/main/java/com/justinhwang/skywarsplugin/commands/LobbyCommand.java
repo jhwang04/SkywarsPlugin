@@ -26,6 +26,12 @@ public class LobbyCommand implements CommandExecutor {
             if(lobbyWorld != null) {
                 plugin.resetPlayerValues(p);
 
+                if(plugin.skywarsGame != null) {
+                    if(p.getWorld().equals(plugin.skywarsGame.getWorld()) && plugin.skywarsGame.getTime() > -10 && plugin.skywarsGame.getTimerGoing() == true) {
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "kill " + p.getName());
+                    }
+                }
+
                 Location l = lobbyWorld.getSpawnLocation();
                 l.setPitch(0.0f);
                 l.setYaw(180f);

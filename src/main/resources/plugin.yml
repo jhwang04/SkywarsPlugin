@@ -14,6 +14,9 @@ commands:
       - l
       - hub
       - leave
+  playskywars:
+    description: Teleports the player to the skywars game world
+    permission: skywarsplugin.lobby
 permissions:
   skywarsplugin.skywars:
     description: Allows a user to enable/disable the plugin, to start a game, to reset the world, etc.
