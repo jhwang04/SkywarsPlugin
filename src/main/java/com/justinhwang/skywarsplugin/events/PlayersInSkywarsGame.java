@@ -36,12 +36,24 @@ public class PlayersInSkywarsGame implements Listener {
                             plugin.skywarsGame.kills.put(e.getPlayer(), 0);
                         }
 
+                        if(plugin.skywarsGame.getPlayers().size() > 1) {
+                            plugin.broadcastToPlayers(ChatColor.GOLD + "Starting in 30 seconds", "To allow time for more players", Bukkit.getWorld(plugin.getConfig().getString("template_world") + "_game"), 0, 20, 10);
+                            Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+                                @Override
+                                public void run() {
+                                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "skywars startgame");
+                                    plugin.skywarsGame.setTime(-40);
+                                }
+                            }, 20);
+                        }
+
                         if(plugin.skywarsGame.getPlayers().size() == plugin.getChestInfo().getInt("numberOfIslands")) {
                             plugin.broadcastToPlayers(ChatColor.GOLD + "Game full!", "", Bukkit.getWorld(plugin.getConfig().getString("template_world") + "_game"), 0, 20, 10);
                             Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
                                 @Override
                                 public void run() {
                                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "skywars startgame");
+                                    plugin.skywarsGame.setTime(-25);
                                 }
                             }, 20);
                         }

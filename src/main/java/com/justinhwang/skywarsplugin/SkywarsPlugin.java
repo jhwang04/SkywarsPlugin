@@ -9,6 +9,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.DisplaySlot;
 
 import java.io.*;
@@ -127,14 +128,19 @@ public class SkywarsPlugin extends JavaPlugin {
         p.getInventory().clear();
         p.setGameMode(GameMode.ADVENTURE);
         p.getActivePotionEffects().clear();
-        p.setExp(0);
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "xp set " + p.getName() + " 0 points");
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "xp set " + p.getName() + " 0 levels");
         p.setFlying(false);
         p.setSwimming(false);
         p.setItemOnCursor(null);
         p.setFoodLevel(20);
         p.setHealth(20.0);
         p.setSaturation(20f);
-        p.setExp(0.0f);
+        p.setAbsorptionAmount(0.0);
+        p.setFireTicks(0);
+        for(PotionEffect pe : p.getActivePotionEffects()) {
+            p.removePotionEffect(pe.getType());
+        }
 
         p.getScoreboard().clearSlot(DisplaySlot.SIDEBAR);
     }

@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
 public class PlayerDeaths implements Listener {
     private SkywarsPlugin plugin;
@@ -94,6 +95,15 @@ public class PlayerDeaths implements Listener {
                     e.setCancelled(true);
                 }
             }
+        }
+    }
+
+    @EventHandler
+    public void onEnderPearl(PlayerTeleportEvent e) {
+        if(e.getCause() == PlayerTeleportEvent.TeleportCause.ENDER_PEARL) {
+            e.getPlayer().teleport(e.getTo());
+            e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 3, 1);
+            e.setCancelled(true);
         }
     }
 }

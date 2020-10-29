@@ -824,6 +824,8 @@ public class SkywarsCommand implements CommandExecutor {
                 }
             }
 
+
+
             // REMEMBER TO CHANGE THIS TO BE THE GAME WORLD INSTEAD OF THE TEMPLATE WORLD! VERY IMPORTANT!
             //String worldName = plugin.getConfig().getString("template_world");
             //World world = Bukkit.getWorld(worldName);
@@ -878,6 +880,8 @@ public class SkywarsCommand implements CommandExecutor {
 
 
 
+
+
                     //for every item to add to a chest...
                     for(int j = 0; j < numItems; j++) {
 
@@ -910,6 +914,7 @@ public class SkywarsCommand implements CommandExecutor {
                         }
 
                     }
+                    chests[0].getInventory().setItem((int) Math.random() * 27, new ItemStack(Material.OAK_PLANKS, 8));
                 }
             }
 
